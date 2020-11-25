@@ -18,7 +18,6 @@ Designer.create = (designer, result) => {
         result(err, null);
         return;
       }
-  
       console.log("assigned designer: ", { id: res.insertId, ...designer });
       result(null, { id: res.insertId, ...designer });
     });

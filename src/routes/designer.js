@@ -6,11 +6,15 @@ router.post('/assign', function (req, res) {
 
      console.log('logging ----- ', req.body);
 
-     // Validate request
-     if (!req.body.user_id) {
+     // Validating the request
+     if (!req.body.user_id || !req.body.deal_id) {
           console.log('inside validation');
           return res.status(400).send({
-               message: "Content can not be empty!"
+               status: "ERROR",
+               message: "Required fields are missing",
+               data: null,
+               errorCode: 4000,
+               displayMessage: "Required fields are missing"
           });
      }
 
