@@ -1,14 +1,13 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const Designer = require('../model/designer');
 
 router.post('/assign', function (req, res) {
 
-     console.log('logging ----- ', req.body);
+     console.log('assign designer request body ', req.body);
 
      // Validating the request
      if (!req.body.user_id || !req.body.deal_id) {
-          console.log('inside validation');
           return res.status(400).send({
                status: "ERROR",
                message: "Required fields are missing",
@@ -25,9 +24,8 @@ router.post('/assign', function (req, res) {
 
      Designer.create(designer, (err, data) => {
           if (err) {
-               res.status(500).send({
-                    message: err.message || 'error occured while inserting'
-               });
+               console.error('Error occured while assigning designer', err.message);
+               res.status(500).send({ message: err.message || 'error occured while inserting'});
           } else {
                res.send({
                     status: "SUCCESS",
