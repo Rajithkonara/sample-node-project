@@ -4,9 +4,8 @@ const Designer = require('../model/designer');
 
 router.post('/assign', function (req, res) {
 
-     console.log('assign designer request body ', req.body);
+     console.log('Assign designer request body ', req.body);
 
-     // Validating the request
      if (!req.body.user_id || !req.body.deal_id) {
           return res.status(400).send({
                status: "ERROR",
@@ -17,15 +16,13 @@ router.post('/assign', function (req, res) {
           });
      }
 
-     const designer = new Designer({
-          user_id: req.body.user_id,
-          deal_id: req.body.deal_id
-     });
+     const { user_id, deal_id } = req.body;
+     const designer = new Designer({ user_id, deal_id });
 
-     Designer.create(designer, (err, data) => {
+     designer.create(designer, (err, data) => {
           if (err) {
                console.error('Error occured while assigning designer', err.message);
-               res.status(500).send({ message: err.message || 'error occured while inserting'});
+               res.status(500).send({ message: err.message || 'error occured while assigning designer' });
           } else {
                res.send({
                     status: "SUCCESS",
@@ -35,7 +32,6 @@ router.post('/assign', function (req, res) {
                })
           }
      })
-
 });
 
 module.exports = router;
