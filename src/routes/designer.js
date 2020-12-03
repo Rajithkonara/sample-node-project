@@ -17,6 +17,7 @@ router.post('/assign', function (req, res) {
      }
 
      const { user_id, deal_id } = req.body;
+
      const designer = new Designer({ user_id, deal_id });
 
      designer.create(designer, (err, data) => {
