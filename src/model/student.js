@@ -1,5 +1,4 @@
 const { v4: uuidv4 } = require('uuid');
-const sql = require('../db/mysql')
 
 const id_prefix = 'sid-';
 

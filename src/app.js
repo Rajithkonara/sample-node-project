@@ -10,7 +10,6 @@ const winston = require('./config/winston')
 
 admin.initializeApp({firebaseConfig});
 
-const designerRouter = require('./routes/designer');
 const userRouter = require('./routes/user')
 const studentRouter = require('./routes/student');
 
@@ -33,7 +32,6 @@ app.use(fileUpload({
   createParentPath: true
 }));
 
-app.use('/designer', designerRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/student', studentRouter);
 
