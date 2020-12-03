@@ -4,6 +4,7 @@ const firebaseAdmin = require('firebase-admin');
 const Student = require('../model/student');
 const { successResponse, errorResponse, internalServerError } = require('../util/response');
 const logger = require('../config/winston');
+const auth = require('../middleware/auth');
 
 const db = firebaseAdmin.firestore();
 
@@ -26,9 +27,9 @@ router.post('/', (req, res) => {
 // note : show aync await works 
 
 /**
- * Get a record  
+ * Get a record protected by auth middleware
  */
-router.get('/:uid', async (req, res) => {
+router.get('/:uid', auth, async (req, res) => {
     try {
         const querySnapshot = await db.collection("test")
             .where("id", "==", req.params.uid).where("is_deleted", "==", false)

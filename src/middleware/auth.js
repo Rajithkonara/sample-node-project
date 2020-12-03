@@ -1,54 +1,32 @@
 const admin = require('firebase-admin')
 const logger = require('../config/winston')
+const { errorResponse } = require('../util/response');
 
 const auth = async (req, res, next) => {
 
     try {
         const authHeader = req.header('Authorization').replace('Bearer ', '');
 
-        logger.info('executing middleware ------_>')
+        logger.info('executing auth middleware ------->')
 
         if (!authHeader) {
-            console.log('errorr');
             throw new Error()
         }
 
-        // admin.auth()
-        //     .verifyIdToken(authHeader)
-        //     .then((decodedToken) => {
-        //         req.email = decodedToken.email;
-        //         console.log('userid -----> ', decodedToken.email);
-        //     })
-        //     .catch((error) => {
-        //         console.log(error);
-        //         res.status(401).send(error)
-        //         throw new Error(error)
-        //     });
-
-        //
-
         try {
-            const decodedToken = await admin.auth()
-                .verifyIdToken(authHeader)
+            const decodedToken = await admin.auth().verifyIdToken(authHeader)
             req.email = decodedToken.email;
-            console.log('userid -----> ', decodedToken.email);
         } catch (error) {
             console.log(error);
-            res.status(401).send({"error": "invalid token"})
+            res.status(401).send(errorResponse('Unauthorized', 'Unauthorized', 4001));
             throw new Error(error)
         }
-
-
-
-
-        console.log('test ');
 
         next()
 
     } catch (error) {
-        res.status(401).send({ "error": "Unauthorized", "message": error })
+        res.status(400).send(errorResponse('Unauthorized', 'Unauthorized', 4001));
     }
-
 }
 
 module.exports = auth;
