@@ -2,23 +2,26 @@ const express = require('express');
 const router = express.Router();
 const firebaseAdmin = require('firebase-admin');
 const Student = require('../model/student');
-const successResponse = require('../util/response');
+const { successResponse, errorResponse, internalServerError } = require('../util/response');
 const logger = require('../config/winston');
 
 const db = firebaseAdmin.firestore();
 
+/**
+ * Add a record
+ */
 router.post('/', (req, res) => {
     try {
         const data = req.body;
         const student = new Student(data);
+        logger.debug('student request: ', data);
         db.collection('test').doc(student.id).set(Object.assign({}, student));
-        res.status(200).send(successResponse('Successfully added a student', 'Successfully added a student', student))
+        res.status(200).send(successResponse('Successfully added a student', 'Successfully added a student', student));
     } catch (e) {
-        console.log(e);
-        res.status(500).send(e)
+        logger.error(e.message);
+        res.status(500).send(internalServerError);
     }
 })
-
 
 // note : show aync await works 
 
@@ -37,54 +40,43 @@ router.get('/:uid', async (req, res) => {
         }));
 
         if (data.length == 0) {
-            res.status(400).send({ message: "invalid id" });
+            res.status(400).send(errorResponse('Invalid student Id', 'Invalid student Id', 4001));
         } else {
-            console.log('Document data:', data[0]);
+            logger.debug('Student retured ', data[0]);
             res.status(200).send(successResponse('Successfully returned student', 'Successfully  returned student', data[0]))
         }
     } catch (e) {
-        console.log(e);
-        res.status(500).send(e)
+        logger.error(e.message);
+        res.status(500).send(internalServerError)
     }
 })
-
-
-//  db.collection("test")
-// .where("id", "==",  req.params.uid)
-// .get()
-// .then((querySnapshot) => {
-//   const data = querySnapshot.docs.map((st) => ({
-//     id: st.id,
-//     ...st.data(),
-//   }));
-//   if(!data.exists) {
-//     console.log("Users with > 1 book: ", data);
-//   }
-//   // Users with > 1 book:  [ { id: 'user-1', count: 1 } ]
-// });
-
 
 
 /**
  * Update a record
  */
 router.put('/:id', async (req, res) => {
-
     try {
-        const data = req.body;
-        // const studentRef = db.collection('test').doc(req.params.id);
-        // const doc = await studentRef.get();
         const studentRef = db.collection('test');
-        const doc = await studentRef.where('id', '==', req.params.id).get();
-        if (!doc.exists) {
-            res.status(400).send({ message: "invalid id" });
+        const querySnapshot = await studentRef
+            .where('id', '==', req.params.id)
+            .where("is_deleted", "==", false)
+            .get();
+
+        const data = querySnapshot.docs.map((st) => ({
+            id: st.id,
+            ...st.data(),
+        }));
+
+        if (data.length == 0) {
+            res.status(400).send(errorResponse('Invalid student Id', 'Invalid student Id', 4001));
         } else {
-            await studentRef.update(data);
+            await studentRef.doc(data[0].id).update(req.body)
             res.status(200).send(successResponse('Successfully updated student', 'Successfully  updated student', null))
         }
     } catch (e) {
-        console.log(e);
-        res.status(500).send(e)
+        logger.error(e.message);
+        res.status(500).send(internalServerError)
     }
 })
 
@@ -96,14 +88,9 @@ router.delete('/:id', async (req, res) => {
         await db.collection('test').doc(req.params.id).delete();
         res.status(200).send(successResponse('Successfully deleted student', 'Successfully  deleted student', null))
     } catch (e) {
-        console.log(e);
-        res.status(500).send(e)
+        logger.error(e.message);
+        res.status(500).send(internalServerError)
     }
-
 })
-
-
-
-
 
 module.exports = router;
